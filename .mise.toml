@@ -1,0 +1,31 @@
+[tools]
+python = "3.12"
+uv = "latest"
+
+[env]
+_.python.venv = { path = ".venv", create = true }
+
+[tasks.setup]
+description = "Installs PlatformIO and required build dependencies"
+# Add 'pip' to the install list so PlatformIO's internal scripts don't crash
+run = "uv pip install pip platformio pyyaml"
+
+[tasks.build]
+description = "Compiles the firmware"
+depends = ["setup"]
+run = "pio run"
+
+[tasks.upload]
+description = "Flashes the firmware to the ESP32"
+depends = ["setup"]
+run = "pio run --target upload"
+
+[tasks.monitor]
+description = "Opens the serial monitor"
+run = "pio device monitor"
+
+[tasks.clean]
+description = "Cleans the board flash memory and build directory"
+run = [
+      "pio run --target erase",
+      "pio run --target clean"]
