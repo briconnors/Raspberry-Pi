@@ -20,9 +20,10 @@ struct DeviceInformation{//custom data type called a device to store all informa
     double voltage = 0.0;
     double current = 0.0;
     double pv_watts = 0.0;
-    double batteryPower= 0.0;//current battery power reading
-    double batteryCurrent = 0.0;//current battery current reading
-    double batterVoltage = 0.0;
+    double grid_watts = 0.0;
+    double ac_watts = 0.0;
+    double dc_watts = 0.0;
+    bool grid_permission = false; //permission to draw from the grid
     
     double timestamp = 0.0; // time stamp to/from battery message
     std::string device;
@@ -31,6 +32,12 @@ struct DeviceInformation{//custom data type called a device to store all informa
     double ac_input = 0.0;
     double dc_input = 0.0;
     double ac_input_setting = 0.0;
+
+    std::string last_request;
+    std::string last_target;
+    int last_value = 0;
+    bool last_status = false;
+    std::string last_state;
 
     double switchPower = 0.0;//current plug power reading
     double switchCurrent = 0.0;//current plug current reading
@@ -47,7 +54,16 @@ struct DeviceInformation{//custom data type called a device to store all informa
 //battery command desired states
 struct BatteryCommand
 {
-    bool ac_input_setting = false;
-    bool ac_output = false;
-    bool dc_output = false;
+    std::string request;
+    std::string target;
+    int value;
+};
+
+struct BatterySchedule
+{
+    std::string request;
+    std::string charge_start;
+    std::string charge_end;
+    std::string discharge_start;
+    std::string discharge_end;
 };

@@ -22,7 +22,7 @@ void Controller::Run(){
     UpdateState();
     EvaluateHealth(device);
     GenerateCommand();
-    //SendCommand();
+    SendCommand();
     VerifyCommand();
 }
 
@@ -66,10 +66,14 @@ void Controller::SendCommand(){
     BatteryCommand command;
     switch(requestedCommand){
         case CommandType::startCharging:
-            command.ac_input_setting = true;
+            command.request = "write";
+            command.target = "ac_input_setting";
+            command.value = 1;
             break;
         case CommandType::stopCharging:
-            command.ac_input_setting = false;
+            command.request = "write";
+            command.target = "ac_input_setting";
+            command.value = 0;
             break;
         default:
             break;

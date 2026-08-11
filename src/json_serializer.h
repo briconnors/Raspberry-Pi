@@ -12,3 +12,7 @@ bool ParseBatteryTelemetry(
 //build a JSON string from a controller command
 std::string BuildBatteryCommandJson(
     const BatteryCommand& command);
+
+std::string BuildBatteryScheduleJson(
+    const BatterySchedule& schedule
+);
