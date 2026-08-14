@@ -9,5 +9,7 @@ bool ConnectMqtt();
 bool PublishMessage(const std::string& topic, const std::string& payload);
 bool SubscribeTopic(const std::string& topic);
 bool GetLatestBattery(DeviceInformation& batteryData);
+bool HasTelemetry();
+double GetTelemetryAge();
 void ProcessMessages();
 void DisconnectMqtt();

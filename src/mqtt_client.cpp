@@ -4,58 +4,64 @@
 #include "mqtt_client.h" //declares helper functions for this file
 #include "config.h" //declares constants
 #include "devices.h"
+#include "json_serializer.h"
 #include <mosquitto.h> //mosquitto C library API to establish
 #include <iostream> //allows printing to terminal with std::cer
-#include "json_serializer.h"
+#include <chrono> //allows time tracking for stale telemetry
 
 static mosquitto* client=nullptr; //makes a client pointer to hold MQTT object
                                   //constant, pointer to mosquitto type client, initially null
 static DeviceInformation latestBattery; // temporary storage for the newest telemetry received
+static bool hasTelemetry = false; // flag to indicate valid telemetry
+static std::chrono::steady_clock::time_point lastTelemetryTime; // timestamp of the last telemetry received
 
 //callback function automatically called whenever a subscribed MQTT message arrives
 static void OnMessage(
     mosquitto*,
     void*,
     const mosquitto_message* msg){
-
     //display received topic for debugging
     std::cout<<"Topic: "<<msg->topic<<std::endl;
-
     //display received payload for debugging
     std::cout<<"Payload: "
              <<std::string(static_cast<char*>(msg->payload),msg->payloadlen)
              <<std::endl;
-
     //assemble payload into a C++ string so it can be passed to the JSON parser
     std::string payload(
         static_cast<char*>(msg->payload),
         msg->payloadlen
     );
-
     //temporary storage for newly parsed battery data
     DeviceInformation battery;
-
     //attempt to parse the JSON payload into the battery structure
-    if(ParseBatteryTelemetry(payload,battery))
-    {
+    if(ParseBatteryTelemetry(payload,battery)){
         //replace the previous battery information with the newest telemetry
         latestBattery = battery;
-
+        lastTelemetryTime = std::chrono::steady_clock::now();
+        hasTelemetry = true;
         std::cout<<"Telemetry updated successfully."<<std::endl;
     }
-    else
-    {
+    else{
         std::cerr<<"Failed to parse battery telemetry."<<std::endl;
     }
 
     //later:
     //set packetReceived=true
 }
-
-bool GetLatestBattery(DeviceInformation& batteryData)
-{
+//helper bools to return the latest battery telemetry to the controller
+bool GetLatestBattery(DeviceInformation& batteryData){
     batteryData = latestBattery;
     return true;
+}
+bool HasTelemetry(){
+    return hasTelemetry;
+}
+double GetTelemetryAge(){
+    if(!hasTelemetry){
+        return 0.0;
+    }
+    auto now=std::chrono::steady_clock::now();
+    return std::chrono::duration<double>(now-lastTelemetryTime).count();
 }
 
 //main initialization call to setup MQTT client to broker connection
@@ -68,7 +74,6 @@ bool ConnectMqtt(){//defining function to return a true/false
     mosquitto_lib_init();//initializes the mosquitto library
     client=mosquitto_new(nullptr,true,nullptr);//creates and stores MQTT client 
                                                //(no custom ID, clean session,no custom pointer attached)
-    
     if(!client){//if the MQTT client doesn't exist
         std::cerr<<"Failed to create MQTT client."<<std::endl;//print error notification
         return false;//exits the function, sends back false to main.cpp

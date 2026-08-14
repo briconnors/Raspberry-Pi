@@ -15,6 +15,7 @@
 int main(){
     std::cout << "STARTING CONTROLLER" << std::endl;
     Controller controller;//create the state machine object to hold the current state of the system
+    controller.SetGridOffsetDemand(500.0); //(Watts) temporary hardcoded requested grid offset, in the future should be replaced with ML or Con-ed Signal
     controller.Initialize();//initialize the controller and all its components
     int loopCounter = 0; //counter to keep track of how many times the loop has run, for debugging purposes
 

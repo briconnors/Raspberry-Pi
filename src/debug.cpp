@@ -11,16 +11,16 @@ std::string FaultTypeToString(Device::FaultType type){
     switch(type){
         case Device::FaultType::none:
             return "no_fault";
-        case Device::FaultType::lowBattery:
-            return "low_battery";
-        case Device::FaultType::tooClose:
-            return "too_close";
         case Device::FaultType::invalidSOC:
             return "invalid_soc";
         case Device::FaultType::invalidVoltage:
             return "invalid_voltage";
         case Device::FaultType::invalidCurrent:
             return "invalid_current";
+        case Device::FaultType::communicationError:
+            return "communication_error";
+        case Device::FaultType::staleTelemetry:
+            return "stale_telemetry";
         default:
             return "unknown_fault";
     }
@@ -74,7 +74,7 @@ void Controller::PrintState(){
         std::cout << "System is discharging" << std::endl;
         break;
     case State::fault:
-        std::cout << "System has a fault" << std::endl;
+        std::cout<<"System has a fault: "<<FaultTypeToString(device.fault)<<std::endl;
         break;
     }
 }
